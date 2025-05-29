@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Anotações</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+            font-size: 16px;
+        }
+
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #4facfe;
+            color: #4facfe;
+        }
+
+        .content {
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .note-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .note-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .note-content {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .note-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 15px;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-admin {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .badge-user {
+            background: #4facfe;
+            color: white;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .users-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .storage-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="user-info">
+                <div>
+                    <h1>📝 Sistema de Anotações</h1>
+                    <p>Notações de Demandas</p>
+                </div>
+                <div>
+                    <span id="currentUser">Usuário Teste</span>
+                    <span id="adminBadge" class="badge badge-admin">ADMIN</span>
+                    <button onclick="logout()" class="btn btn-danger" style="margin-left: 10px;">Sair</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('notes')" id="notesTab">
+                📋 Minhas Anotações
+            </button>
+            <button class="tab" onclick="showTab('admin')" id="adminTab">
+                ⚙️ Administração
+            </button>
+        </div>
+
+        <div class="content">
+            <!-- Aba de Anotações -->
+            <div id="notesContent">
+                <div class="note-form">
+                    <h3>✏️ Nova Anotação</h3>
+                    <div class="form-group">
+                        <label for="noteTitle">Título:</label>
+                        <input type="text" id="noteTitle" placeholder="Digite o título da anotação...">
+                    </div>
+                    <div class="form-group">
+                        <label for="noteContent">Conteúdo:</label>
+                        <textarea id="noteContent" placeholder="Digite o conteúdo da anotação..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="noteCategory">Categoria:</label>
+                        <select id="noteCategory">
+                            <option value="pessoal">Pessoal</option>
+                            <option value="trabalho">Trabalho</option>
+                            <option value="estudos">Estudos</option>
+                            <option value="ideias">Ideias</option>
+                            <option value="tarefas">Tarefas</option>
+                        </select>
+                    </div>
+                    <button onclick="addNote()" class="btn">
+                        ➕ Adicionar Anotação
+                    </button>
+                </div>
+
+                <div id="notesContainer" class="notes-grid">
+                    <!-- Anotações serão carregadas aqui -->
+                </div>
+            </div>
+
+            <!-- Aba de Administração -->
+            <div id="adminContent" class="hidden">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalNotes">0</div>
+                        <div>Total de Anotações</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">0</div>
+                        <div>Total de Usuários</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="storageUsed">0 KB</div>
+                        <div>Armazenamento Usado</div>
+                    </div>
+                </div>
+
+                <div class="storage-info">
+                    <h4>📊 Informações de Armazenamento</h4>
+                    <p id="storageDetails">Carregando...</p>
+                </div>
+
+                <h3>👥 Gerenciar Usuários</h3>
+                <button onclick="addUser()" class="btn btn-success">
+                    ➕ Adicionar Usuário
+                </button>
+                <button onclick="emergencyCleanup()" class="btn btn-danger" style="margin-left: 10px;">
+                    🧹 Limpeza Emergencial
+                </button>
+
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Anotações</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Usuários serão carregados aqui -->
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 30px;">📋 Todas as Anotações</h3>
+                <div id="adminNotesContainer" class="notes-grid">
+                    <!-- Todas as anotações serão mostradas aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar usuário -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Editar Usuário</h3>
+            <div class="form-group">
+                <label for="editUsername">Usuário:</label>
+                <input type="text" id="editUsername">
+            </div>
+            <div class="form-group">
+                <label for="editEmail">Email:</label>
+                <input type="email" id="editEmail">
+            </div>
+            <div class="form-group">
+                <label for="editPassword">Nova Senha (deixe vazio para manter):</label>
+                <input type="password" id="editPassword">
+            </div>
+            <div class="form-group">
+                <label for="editIsAdmin">Tipo:</label>
+                <select id="editIsAdmin">
+                    <option value="false">Usuário</option>
+                    <option value="true">Administrador</option>
+                </select>
+            </div>
+            <button onclick="saveUserEdit()" class="btn btn-success">💾 Salvar</button>
+            <button onclick="closeEditUserModal()" class="btn" style="margin-left: 10px;">❌ Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        // Dados em memória (substituindo localStorage)
+        let notes = [
+            {
+                id: '1',
+                title: 'Exemplo de Anotação',
+                content: 'Esta é uma anotação de exemplo para demonstrar o funcionamento do sistema.',
+                category: 'pessoal',
+                userId: '1',
+                username: 'Admin',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            }
+        ];
+
+        let users = [
+            {
+                id: '1',
+                username: 'admin',
+                email: 'admin@example.com',
+                password: '123456',
+                isAdmin: true,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: '2',
+                username: 'usuario',
+                email: 'user@example.com',
+                password: '123456',
+                isAdmin: false,
+                createdAt: new Date().toISOString()
+            }
+        ];
+
+        let currentUser = users[0]; // Usuário admin por padrão
+        let currentTab = 'notes';
+        let editingUserId = null;
+
+        // Inicializar aplicação
+        function init() {
+            updateCurrentUser();
+            loadNotes();
+            updateAdminStats();
+            loadUsersTable();
+            showTab('notes');
+        }
+
+        // Atualizar informações do usuário atual
+        function updateCurrentUser() {
+            document.getElementById('currentUser').textContent = currentUser.username;
+            
+            if (currentUser.isAdmin) {
+                document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('adminTab').classList.remove('hidden');
+            } else {
+                document.getElementById('adminBadge').classList.add('hidden');
+                document.getElementById('adminTab').classList.add('hidden');
+            }
+        }
+
+        // Trocar abas
+        function showTab(tabName) {
+            currentTab = tabName;
+            
+            // Remover classe active de todas as abas
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Ocultar todo conteúdo
+            document.getElementById('notesContent').classList.add('hidden');
+            document.getElementById('adminContent').classList.add('hidden');
+            
+            if (tabName === 'notes') {
+                document.getElementById('notesTab').classList.add('active');
+                document.getElementById('notesContent').classList.remove('hidden');
+                loadNotes();
+            } else if (tabName === 'admin' && currentUser.isAdmin) {
+                document.getElementById('adminTab').classList.add('active');
+                document.getElementById('adminContent').classList.remove('hidden');
+                updateAdminStats();
+                loadUsersTable();
+                loadAdminNotes();
+            }
+        }
+
+        // Adicionar nova anotação
+        function addNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value.trim();
+            const category = document.getElementById('noteCategory').value;
+
+            if (!title || !content) {
+                alert('⚠️ Por favor, preencha o título e o conteúdo da anotação!');
+                return;
+            }
+
+            const newNote = {
+                id: Date.now().toString(),
+                title: title,
+                content: content,
+                category: category,
+                userId: currentUser.id,
+                username: currentUser.username,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            notes.push(newNote);
+
+            // Limpar formulário
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            document.getElementById('noteCategory').value = 'pessoal';
+
+            loadNotes();
+            updateAdminStats();
+            
+            alert('✅ Anotação adicionada com sucesso!');
+        }
+
+        // Carregar anotações do usuário atual
+        function loadNotes() {
+            const container = document.getElementById('notesContainer');
+            const userNotes = notes.filter(note => note.userId === currentUser.id);
+
+            if (userNotes.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
+                        <h3>📝 Nenhuma anotação encontrada</h3>
+                        <p>Crie sua primeira anotação usando o formulário acima!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = userNotes
+                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                .map(note => `
+                    <div class="note-card">
+                        <div class="note-header">
+                            <div class="note-title">${note.title}</div>
+                            <button onclick="deleteNote('${note.id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
+                                🗑️
+                            </button>
+                        </div>
+                        <div class="note-content">${note.content}</div>
+                        <div class="note-meta">
+                            <span class="badge badge-user">${note.category}</span>
+                            <span>${formatDate(note.createdAt)}</span>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        // Deletar anotação
+        function deleteNote(id) {
+            if (!confirm('❓ Tem certeza que deseja excluir esta anotação?')) return;
+
+            const index = notes.findIndex(n => n.id === id);
+            if (index > -1) {
+                notes.splice(index, 1);
+                loadNotes();
+                updateAdminStats();
+                alert('✅ Anotação excluída com sucesso!');
+            }
+        }
+
+        // Carregar todas as anotações (admin)
+        function loadAdminNotes() {
+            const container = document.getElementById('adminNotesContainer');
+
+            if (notes.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
+                        <h3>📝 Nenhuma anotação no sistema</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = notes
+                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                .map(note => `
+                    <div class="note-card">
+                        <div class="note-header">
+                            <div class="note-title">${note.title}</div>
+                            <button onclick="adminDeleteNote('${note.id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
+                                🗑️ Admin
+                            </button>
+                        </div>
+                        <div class="note-content">${note.content}</div>
+                        <div class="note-meta">
+                            <span class="badge badge-user">${note.category}</span>
+                            <div>
+                                <small>Por: ${note.username}</small><br>
+                                <small>${formatDate(note.createdAt)}</small>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        // Deletar anotação como admin
+        function adminDeleteNote(noteId) {
+            if (!confirm('❓ Tem certeza que deseja excluir esta anotação como administrador?')) return;
+            
+            const index = notes.findIndex(n => n.id === noteId);
+            if (index > -1) {
+                notes.splice(index, 1);
+                loadAdminNotes();
+                updateAdminStats();
+                alert('✅ Anotação excluída pelo administrador!');
+            }
+        }
+
+        // Atualizar estatísticas do admin
+        function updateAdminStats() {
+            document.getElementById('totalNotes').textContent = notes.length;
+            document.getElementById('totalUsers').textContent = users.length;
+            
+            // Simular uso de armazenamento
+            const dataSize = JSON.stringify({notes, users}).length;
+            document.getElementById('storageUsed').textContent = formatBytes(dataSize);
+            
+            document.getElementById('storageDetails').innerHTML = `
+                Anotações: ${notes.length} itens (${formatBytes(JSON.stringify(notes).length)})<br>
+                Usuários: ${users.length} itens (${formatBytes(JSON.stringify(users).length)})<br>
+                Total: ${formatBytes(dataSize)}
+            `;
+        }
+
+        // Carregar tabela de usuários
+        function loadUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="badge ${user.isAdmin ? 'badge-admin' : 'badge-user'}">
+                            ${user.isAdmin ? 'Admin' : 'Usuário'}
+                        </span>
+                    </td>
+                    <td>${notes.filter(n => n.userId === user.id).length}</td>
+                    <td>
+                        <button onclick="editUser('${user.id}')" class="btn" style="padding: 5px 10px; font-size: 12px; margin-right: 5px;">
+                            ✏️ Editar
+                        </button>
+                        <button onclick="deleteUser('${user.id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
+                            🗑️ Excluir
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Adicionar usuário
+        function addUser() {
+            const username = prompt('Nome de usuário:');
+            if (!username) return;
+            
+            const email = prompt('Email:');
+            if (!email) return;
+            
+            const password = prompt('Senha:');
+            if (!password) return;
+            
+            const isAdmin = confirm('Usuário administrador?');
+            
+            // Verificar se usuário já existe
+            if (users.find(u => u.username === username)) {
+                alert('❌ Nome de usuário já existe!');
+                return;
+            }
+            
+            const newUser = {
+                id: Date.now().toString(),
+                username: username,
+                email: email,
+                password: password,
+                isAdmin: isAdmin,
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            loadUsersTable();
+            updateAdminStats();
+            alert('✅ Usuário adicionado com sucesso!');
+        }
+
+        // Editar usuário
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            editingUserId = userId;
+            
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editEmail').value = user.email;
+            document.getElementById('editPassword').value = '';
+            document.getElementById('editIsAdmin').value = user.isAdmin.toString();
+            
+            document.getElementById('editUserModal').style.display = 'block';
+        }
+
+        // Salvar edição do usuário
+        function saveUserEdit() {
+            if (!editingUserId) return;
+            
+            const username = document.getElementById('editUsername').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const password = document.getElementById('editPassword').value.trim();
+            const isAdmin = document.getElementById('editIsAdmin').value === 'true';
+            
+            if (!username || !email) {
+                alert('❌ Usuário e email são obrigatórios!');
+                return;
+            }
+            
+            const existingUser = users.find(u => u.username === username && u.id !== editingUserId);
+            if (existingUser) {
+                alert('❌ Nome de usuário já existe!');
+                return;
+            }
+            
+            const userIndex = users.findIndex(u => u.id === editingUserId);
+            if (userIndex > -1) {
+                users[userIndex].username = username;
+                users[userIndex].email = email;
+                users[userIndex].isAdmin = isAdmin;
+                
+                if (password) {
+                    users[userIndex].password = password;
+                }
+                
+                // Atualizar nome nas anotações
+                notes.forEach(note => {
+                    if (note.userId === editingUserId) {
+                        note.username = username;
+                    }
+                });
+                
+                // Se for o usuário atual, atualizar interface
+                if (editingUserId === currentUser.id) {
+                    currentUser = users[userIndex];
+                    updateCurrentUser();
+                    
+                    if (!currentUser.isAdmin && currentTab === 'admin') {
+                        showTab('notes');
+                    }
+                }
+                
+                closeEditUserModal();
+                loadUsersTable();
+                updateAdminStats();
+                loadNotes();
+                loadAdminNotes();
+                alert('✅ Usuário atualizado com sucesso!');
+            }
+        }
+
+        // Fechar modal de edição
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none';
+            editingUserId = null;
+        }
+
+        // Deletar usuário
+        function deleteUser(userId) {
+            if (!confirm('❓ Tem certeza que deseja excluir este usuário? Todas as anotações dele também serão excluídas!')) return;
+            
+            const userIndex = users.findIndex(u => u.id === userId);
+            if (userIndex > -1) {
+                users.splice(userIndex, 1);
+                notes = notes.filter(n => n.userId !== userId);
+                
+                loadUsersTable();
+                updateAdminStats();
+                loadNotes();
+                loadAdminNotes();
+                alert('✅ Usuário excluído com sucesso!');
+            }
+        }
+
+        // Limpeza emergencial
+        function emergencyCleanup() {
+            if (!confirm('⚠️ LIMPEZA EMERGENCIAL ⚠️\n\nEsta ação irá:\n- Remover TODAS as anotações\n- Manter apenas os usuários\n- Liberar todo o espaço de armazenamento\n\nContinuar?')) {
+                return;
+            }
+            
+            if (!confirm('❓ Tem CERTEZA ABSOLUTA?\n\nEsta ação NÃO PODE ser desfeita!')) {
+                return;
+            }
+            
+            const totalNotes = notes.length;
+            notes.length = 0;
+            
+            loadNotes();
+            loadAdminNotes();
+            updateAdminStats();
+            
+            alert(`✅ Limpeza emergencial concluída!\n\n${totalNotes} anotações foram removidas.\nO sistema agora está funcionando normalmente.`);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('❓ Deseja realmente sair?')) {
+                // Trocar para usuário comum
+                currentUser = users.find(u => !u.isAdmin) || users[0];
+                updateCurrentUser();
+                showTab('notes');
+                alert('👋 Logout realizado com sucesso!');
+            }
+        }
+
+        // Utilitários
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString('pt-BR');
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('editUserModal');
+            if (event.target === modal) {
+                closeEditUserModal();
+            }
+        }
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + Enter para salvar anotação
+            if (e.ctrlKey && e.key === 'Enter') {
+                if (currentTab === 'notes') {
+                    addNote();
+                }
+            }
+            
+            // Escape para fechar modal
+            if (e.key === 'Escape') {
+                closeEditUserModal();
+            }
+        });
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Adicionar funcionalidade de busca
+        function addSearchFunctionality() {
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = '🔍 Buscar anotações...';
+            searchInput.style.cssText = `
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 20px;
+                border: 2px solid #e9ecef;
+                border-radius: 25px;
+                font-size: 16px;
+            `;
+            
+            searchInput.oninput = function() {
+                filterNotes(this.value);
+            };
+            
+            // Adicionar campo de busca antes do container de notas
+            const notesContainer = document.getElementById('notesContainer');
+            notesContainer.parentNode.insertBefore(searchInput, notesContainer);
+        }
+
+        function filterNotes(searchTerm) {
+            const userNotes = notes.filter(note => note.userId === currentUser.id);
+            const filteredNotes = userNotes.filter(note => 
+                note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                note.category.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            displayFilteredNotes(filteredNotes);
+        }
+
+        function displayFilteredNotes(filteredNotes) {
+            const container = document.getElementById('notesContainer');
+            
+            if (filteredNotes.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
+                        <h3>🔍 Nenhuma anotação encontrada</h3>
+                        <p>Tente usar outros termos de busca!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredNotes
+                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                .map(note => `
+                    <div class="note-card">
+                        <div class="note-header">
+                            <div class="note-title">${note.title}</div>
+                            <button onclick="deleteNote('${note.id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
+                                🗑️
+                            </button>
+                        </div>
+                        <div class="note-content">${note.content}</div>
+                        <div class="note-meta">
+                            <span class="badge badge-user">${note.category}</span>
+                            <span>${formatDate(note.createdAt)}</span>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        // Função para trocar de usuário (para demonstração)
+        function switchUser() {
+            const userOptions = users.map((user, index) => `${index + 1}. ${user.username} ${user.isAdmin ? '(Admin)' : ''}`).join('\n');
+            const choice = prompt(`Escolha um usuário:\n\n${userOptions}\n\nDigite o número:`);
+            
+            if (choice && !isNaN(choice)) {
+                const userIndex = parseInt(choice) - 1;
+                if (userIndex >= 0 && userIndex < users.length) {
+                    currentUser = users[userIndex];
+                    updateCurrentUser();
+                    loadNotes();
+                    
+                    if (!currentUser.isAdmin && currentTab === 'admin') {
+                        showTab('notes');
+                    }
+                    
+                    alert(`✅ Usuário alterado para: ${currentUser.username}`);
+                }
+            }
+        }
+
+        // Adicionar botão para trocar usuário (para demonstração)
+        function addUserSwitcher() {
+            const userInfo = document.querySelector('.user-info');
+            const switchBtn = document.createElement('button');
+            switchBtn.textContent = '🔄 Trocar Usuário';
+            switchBtn.className = 'btn';
+            switchBtn.style.marginLeft = '10px';
+            switchBtn.onclick = switchUser;
+            
+            userInfo.querySelector('div:last-child').appendChild(switchBtn);
+        }
+
+        // Função para exportar dados
+        function exportData() {
+            const data = {
+                notes: notes,
+                users: users.map(u => ({...u, password: '***'})), // Ocultar senhas
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `anotacoes_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Dados exportados com sucesso!');
+        }
+
+        // Adicionar botão de exportação no painel admin
+        function addExportButton() {
+            const adminContent = document.getElementById('adminContent');
+            const exportBtn = document.createElement('button');
+            exportBtn.textContent = '📥 Exportar Dados';
+            exportBtn.className = 'btn btn-success';
+            exportBtn.style.marginLeft = '10px';
+            exportBtn.onclick = exportData;
+            
+            // Adicionar após o botão de limpeza emergencial
+            const cleanupBtn = adminContent.querySelector('button[onclick="emergencyCleanup()"]');
+            cleanupBtn.parentNode.insertBefore(exportBtn, cleanupBtn.nextSibling);
+        }
+
+        // Melhorar a inicialização
+        function init() {
+            updateCurrentUser();
+            loadNotes();
+            updateAdminStats();
+            loadUsersTable();
+            showTab('notes');
+            
+            // Adicionar funcionalidades extras
+            setTimeout(() => {
+                addSearchFunctionality();
+                addUserSwitcher();
+                addExportButton();
+            }, 100);
+        }
+
+        // Função para adicionar mais anotações de exemplo
+        function addSampleNotes() {
+            const sampleNotes = [
+                {
+                    title: 'Lista de Compras',
+                    content: 'Leite, Pão, Ovos, Frutas, Verduras',
+                    category: 'pessoal'
+                },
+                {
+                    title: 'Reunião de Projeto',
+                    content: 'Discutir cronograma, definir responsabilidades, revisar orçamento',
+                    category: 'trabalho'
+                },
+                {
+                    title: 'Estudar JavaScript',
+                    content: 'Revisar arrays, objetos, funções assíncronas e DOM manipulation',
+                    category: 'estudos'
+                },
+                {
+                    title: 'Ideia para App',
+                    content: 'Aplicativo para organizar receitas culinárias com fotos e ingredientes',
+                    category: 'ideias'
+                },
+                {
+                    title: 'Exercícios da Semana',
+                    content: 'Segunda: Corrida, Terça: Academia, Quarta: Natação, Quinta: Yoga',
+                    category: 'pessoal'
+                }
+            ];
+            
+            sampleNotes.forEach(sample => {
+                const newNote = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    title: sample.title,
+                    content: sample.content,
+                    category: sample.category,
+                    userId: currentUser.id,
+                    username: currentUser.username,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                notes.push(newNote);
+            });
+            
+            loadNotes();
+            updateAdminStats();
+            alert('✅ Anotações de exemplo adicionadas!');
+        }
+
+        // Adicionar botão para criar anotações de exemplo
+        function addSampleNotesButton() {
+            const noteForm = document.querySelector('.note-form');
+            const sampleBtn = document.createElement('button');
+            sampleBtn.textContent = '📝 Adicionar Exemplos';
+            sampleBtn.className = 'btn';
+            sampleBtn.style.marginLeft = '10px';
+            sampleBtn.onclick = addSampleNotes;
+            sampleBtn.type = 'button';
+            
+            noteForm.querySelector('button').parentNode.appendChild(sampleBtn);
+        }
+
+        // Atualizar a função init para incluir o botão de exemplos
+        function init() {
+            updateCurrentUser();
+            loadNotes();
+            updateAdminStats();
+            loadUsersTable();
+            showTab('notes');
+            
+            // Adicionar funcionalidades extras
+            setTimeout(() => {
+                addSearchFunctionality();
+                addUserSwitcher();
+                addExportButton();
+                addSampleNotesButton();
+            }, 100);
+        }
+    </script>
+</body>
+</html>
