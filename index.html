@@ -1382,7 +1382,8 @@
             }
         });
 
-        // Verificar se há usuário logado na sessão
+        initializeData();
+
         const savedUser = storage.getItem('currentUser');
         if (savedUser) {
             try {
@@ -1393,9 +1394,6 @@
             }
         }
     });
-
-    // Inicializar dados quando a página carregar
-    initializeData();
 </script>
 </body>
 </html>
