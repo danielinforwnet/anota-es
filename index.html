@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Anotações - Login</title>
     <style>
+        
         * {
             margin: 0;
             padding: 0;
@@ -661,6 +662,24 @@
     </div>
 
     <script>
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCTYJ0gNmz3-SGmPRgJ5F0nqOSrQ8FLnJE",
+  authDomain: "anotacoes-3cef6.firebaseapp.com",
+  projectId: "anotacoes-3cef6",
+  storageBucket: "anotacoes-3cef6.firebasestorage.app",
+  messagingSenderId: "31010881890",
+  appId: "1:31010881890:web:abeca56b5fe186bedbec3b"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
         // Persistência usando localStorage
         class LocalStorage {
             setItem(key, value) {
