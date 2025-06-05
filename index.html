@@ -661,50 +661,27 @@
     </div>
 
     <script>
-        // Simulação de Storage para persistência de dados na sessão
-        class SessionStorage {
-            constructor() {
-                this.data = {};
-                this.loadFromMemory();
-            }
-
+        // Persistência usando localStorage
+        class LocalStorage {
             setItem(key, value) {
-                this.data[key] = value;
-                this.saveToMemory();
+                localStorage.setItem(key, value);
             }
 
             getItem(key) {
-                return this.data[key] || null;
+                return localStorage.getItem(key);
             }
 
             removeItem(key) {
-                delete this.data[key];
-                this.saveToMemory();
+                localStorage.removeItem(key);
             }
 
             clear() {
-                this.data = {};
-                this.saveToMemory();
-            }
-
-            // Simula persistência usando uma variável global
-            saveToMemory() {
-                window.persistentData = JSON.stringify(this.data);
-            }
-
-            loadFromMemory() {
-                if (window.persistentData) {
-                    try {
-                        this.data = JSON.parse(window.persistentData);
-                    } catch (e) {
-                        this.data = {};
-                    }
-                }
+                localStorage.clear();
             }
         }
 
         // Instância do storage simulado
-        const storage = new SessionStorage();
+        const storage = new LocalStorage();
 
         // Dados padrão do sistema
         const defaultData = {
